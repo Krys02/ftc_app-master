@@ -19,10 +19,6 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Maxwell on 9/17/2018.
- */
-
 public class GoldAlignDetector extends OpenCVDetector {
 
     // Defining Mats to be used.
