@@ -55,8 +55,7 @@ public class GoldAlignDetector extends OpenCVDetector {
         super();
         detectorName = "Gold Align Detector"; // Set the detector name
     }
-
-
+    
     @Override
     public Mat process(Mat input) {
 
