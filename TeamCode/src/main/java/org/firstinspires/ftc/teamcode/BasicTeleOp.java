@@ -11,8 +11,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.HardwareConfigs.CMHardware;
 
-// TEST EDIT
-
 @TeleOp(name="Solo TeleOp BLUE", group="TeleOp")
 
 public class BasicTeleOp extends LinearOpMode {
