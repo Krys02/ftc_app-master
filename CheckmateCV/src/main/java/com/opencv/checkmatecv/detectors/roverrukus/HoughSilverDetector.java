@@ -24,7 +24,8 @@ import java.util.List;
 
 public class HoughSilverDetector extends OpenCVDetector {
 
-    // Development Class for Hough transform detection.
+    //The scorer used for this class. Based upon minimizing the standard deviation of color within each mineral,
+    //I.e, if the region is actually a mineral it should be fairly flat.
     public OpenCVScorer stdDevScorer = new ColorDevScorer();
 
     public double sensitivity = 1.4; //Sensitivity of circle detector; between about 1.2 and 2.1;

@@ -1,25 +1,14 @@
-package org.firstinspires.ftc.teamcode.HardwareConfigs;
-
-import android.app.Activity;
-import android.graphics.Color;
-import android.view.View;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-
-import org.firstinspires.ftc.robotcore.internal.hardware.DragonboardLynxDragonboardIsPresentPin;
 
 public class CMHardware
 {
@@ -35,10 +24,7 @@ public class CMHardware
     public BNO055IMU imu = null;
     public BNO055IMU imu2 = null;
 
-
-
-    public CRServo intake1 = null;
-    public CRServo intake2 = null;
+    public CRServo intake = null;
 
     public Servo gate = null;
     public Servo intakeTiltLeft = null;
@@ -56,7 +42,6 @@ public class CMHardware
     public CMHardware(){
 
     }
-
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap ahwMap, boolean initServos, boolean initIMU, boolean useDriveEncoders) {
         hwMap = ahwMap;
@@ -96,8 +81,8 @@ public class CMHardware
         actuator2 = hwMap.get(DcMotor.class, "actuator2");
 
         //init Servos
-        intake1 = hwMap.get(CRServo.class, "intake1");
-        intake2 = hwMap.get(CRServo.class, "intake2");
+        intake = hwMap.get(CRServo.class, "intake");
+//        intake2 = hwMap.get(CRServo.class, "intake2");
         gate = hwMap.get(Servo.class, "gate");
         intakeTiltLeft = hwMap.get(Servo.class, "left");
         intakeTiltRight = hwMap.get(Servo.class, "right");
@@ -134,8 +119,7 @@ public class CMHardware
         actuator2.setDirection(DcMotor.Direction.REVERSE  );
 
         //set CR servo directions
-        intake1.setDirection(CRServo.Direction.FORWARD);
-        intake2.setDirection(CRServo.Direction.REVERSE);
+        intake.setDirection(CRServo.Direction.FORWARD);
 
         //set motor zero power behaviors
         leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -190,8 +174,7 @@ public class CMHardware
         backLeftDrive.setPower(power);
     }
     public void intakeSpeed(double power){
-        intake1.setPower(power);
-        intake2.setPower(power);
+        intake.setPower(-power);
     }
     public void gatePosition(String position){
         switch (position){
@@ -199,7 +182,7 @@ public class CMHardware
                 gate.setPosition(0.95);
                 break;
             case "CLOSE":
-                gate.setPosition(0.2);
+                gate.setPosition(0.4);
                 break;
         }
     }

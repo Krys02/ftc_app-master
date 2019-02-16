@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.opencv.checkmatecv.math.MathFTC;
+import com.vuforia.CameraDevice;
 import com.vuforia.Frame;
 
 import org.firstinspires.ftc.robotcore.internal.vuforia.VuforiaLocalizerImpl;
@@ -147,5 +148,11 @@ public abstract class CVVuforia extends VuforiaLocalizerImpl {
                 workerThread.interrupt();
             }
         });
+    }
+    public void flashOn(){
+        CameraDevice.getInstance().setFlashTorchMode(true);
+    }
+    public void flashOff(){
+        CameraDevice.getInstance().setFlashTorchMode(false);
     }
 }

@@ -34,7 +34,6 @@ import com.opencv.checkmatecv.OpenCV;
 import com.opencv.checkmatecv.detectors.roverrukus.GoldDetector;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.opencv.core.Rect;
 
 
@@ -44,7 +43,6 @@ public class GoldExample extends OpMode
 {
     // Detector object
     private GoldDetector detector;
-
 
     @Override
     public void init() {
@@ -58,15 +56,12 @@ public class GoldExample extends OpMode
         detector.downscale = 0.4; // How much to downscale the input frames
 
         detector.areaScoringMethod = OpenCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
-        //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
         detector.maxAreaScorer.weight = 0.005; //
 
         detector.ratioScorer.weight = 5; //
         detector.ratioScorer.perfectRatio = 1.0; // Ratio adjustment
 
         detector.enable(); // Start the detector!
-
-
     }
 
     /*
@@ -81,7 +76,6 @@ public class GoldExample extends OpMode
      */
     @Override
     public void start() {
-
     }
 
     /*
@@ -103,5 +97,4 @@ public class GoldExample extends OpMode
         // Disable the detector
         if(detector != null) detector.disable();
     }
-
 }

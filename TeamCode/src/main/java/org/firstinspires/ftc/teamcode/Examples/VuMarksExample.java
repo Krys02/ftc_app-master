@@ -119,6 +119,7 @@ public class VuMarksExample extends OpMode {
     public void stop() {
         detector.disable();
         super.stop();
+
     }
 
 }

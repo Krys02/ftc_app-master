@@ -9,8 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.HardwareConfigs.CMHardware;
-
 @TeleOp(name="Solo TeleOp BLUE", group="TeleOp")
 
 public class BasicTeleOp extends LinearOpMode {
@@ -49,23 +47,15 @@ public class BasicTeleOp extends LinearOpMode {
         boolean armPositionToggle = true;
         boolean tiltToggle = true;
         int intakePos = 0;
-        //string stuffs
+        // string stuffs
         String actuatorDirection = "STOP";
-//        String teamColor = "BLUE";
+        // String teamColor = "BLUE";
 
-        robot.init(hardwareMap, false, false, false);
+        robot.init(hardwareMap, false, false, true);
 
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
         final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
-        robot.actuator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.actuator2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.actuator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.actuator2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.actuator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.actuator2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.actuator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.actuator2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         while (!isStarted() && !isStopRequested()) {
             telemetry.addData("Status:", "Initialized, ready to run");
             telemetry.update();
@@ -86,9 +76,9 @@ public class BasicTeleOp extends LinearOpMode {
             rotateSpeed = gamepad1.left_trigger - gamepad1.right_trigger;
 
             if (gamepad1.right_bumper) {
-                intakePower = 1;
+                intakePower = 0.9;
             } else if (gamepad1.left_bumper) {
-                intakePower = -1;
+                intakePower = -0.9;
             } else {
                 intakePower = 0;
             }
@@ -102,9 +92,9 @@ public class BasicTeleOp extends LinearOpMode {
                 slowModeToggleReady = true;
             }
 
-            if (gamepad1.x) {
+            if (gamepad1.x || gamepad1.a) {
                 robot.gatePosition("OPEN");
-                intakePower = 1;
+                intakePower = 0.9;
             } else if (!gamepad1.x) {
                 robot.gatePosition("CLOSE");
             }
@@ -155,7 +145,7 @@ public class BasicTeleOp extends LinearOpMode {
                 }
 
                 if (gamepad1.a) {
-                    robot.intakePosition(0.55);
+                    robot.intakePosition(0.6);
                 } else {
                     if (gamepad1.b) {
                         intakePos = 1;
@@ -164,10 +154,10 @@ public class BasicTeleOp extends LinearOpMode {
                         intakePos = 2;
                     }
                     if (intakePos == 1) {
-                        robot.intakePosition(1);
+                        robot.intakePosition(0.95);
                     }
                     if (intakePos == 2) {
-                        robot.intakePosition(0.65);
+                        robot.intakePosition(0.7);
                     }
                 }
 
@@ -203,8 +193,6 @@ public class BasicTeleOp extends LinearOpMode {
 //            telemetry.addData("Front Right Drive Encoder", robot.rightDrive.getCurrentPosition());
 //            telemetry.addData("Back Left Drive Encoder", robot.backLeftDrive.getCurrentPosition());
 //            telemetry.addData("Back Right Drive Encoder", robot.backRightDrive.getCurrentPosition());
-//            telemetry.addData("Actuator 1 Encoder", robot.actuator1.getCurrentPosition());
-//            telemetry.addData("Actuator 2 Encoder", robot.actuator2.getCurrentPosition());
 
 //            telemetry.addData("Potentiometer:", robot.potentiometer.getVoltage());
 
