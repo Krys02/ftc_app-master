@@ -59,16 +59,6 @@ public class CMHardware
             imu = hwMap.get(BNO055IMU.class, "imu");
             imu.initialize(parameters);
 
-            BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
-            parameters2.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-            parameters2.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-            parameters2.calibrationDataFile = "BNO055IMUCalibration.json";
-            parameters2.loggingEnabled = true;
-            parameters2.loggingTag = "IMU2";
-            parameters2.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-            //init IMU2
-            imu2 = hwMap.get(BNO055IMU.class, "imu2");
-            imu2.initialize(parameters);
         }
         //init Motors
         leftDrive  = hwMap.get(DcMotor.class, "front_left");
