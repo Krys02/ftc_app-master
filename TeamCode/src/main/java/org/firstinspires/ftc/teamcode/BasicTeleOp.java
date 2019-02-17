@@ -26,7 +26,7 @@ public class BasicTeleOp extends LinearOpMode {
         double rightMotorSpeed;
         double backLeftMotorSpeed;
         double backRightMotorSpeed;
-        boolean slowMode = false;
+        int slowMode = 0;
 
         float multiplierSpeed = 1f;
 
@@ -38,6 +38,7 @@ public class BasicTeleOp extends LinearOpMode {
 
         boolean onMark = false;
         boolean sampleServoDown = false;
+        boolean intakeRunning = false;
 
         //toggles
         boolean slowModeToggleReady = true;
@@ -69,23 +70,41 @@ public class BasicTeleOp extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-//            telemetry.addData("Status:", "Running");
+            telemetry.addData("Status:", "Running");
 
             speed = -gamepad1.left_stick_y;
             strafeSpeed = gamepad1.left_stick_x;
             rotateSpeed = gamepad1.left_trigger - gamepad1.right_trigger;
 
-            if (gamepad1.right_bumper) {
-                intakePower = 0.9;
-            } else if (gamepad1.left_bumper) {
-                intakePower = -0.9;
+            if (gamepad1.b){
+                intakeRunning = true;
+            }
+            if (gamepad1.right_bumper || gamepad1.left_bumper){
+                intakeRunning = false;
+            }
+
+            if (!intakeRunning) {
+                if (gamepad1.right_bumper) {
+                    intakePower = 0.9;
+                } else if (gamepad1.left_bumper) {
+                    intakePower = -0.9;
+                } else {
+                    intakePower = 0;
+                }
             } else {
-                intakePower = 0;
+                intakePower = 0.9;
             }
 
 
             if (gamepad1.left_stick_button && slowModeToggleReady) {
-                slowMode = !slowMode;
+                switch (slowMode){
+                    case 1:
+                        slowMode = 0;
+                        break;
+                    case 0:
+                        slowMode = 1;
+                        break;
+                }
                 slowModeToggleReady = false;
             }
             if (!gamepad1.left_stick_button) {
@@ -101,7 +120,7 @@ public class BasicTeleOp extends LinearOpMode {
 
             robot.intakeSpeed(intakePower);
 
-            if (slowMode) {
+            if (slowMode == 1) {
                 multiplierSpeed = 0.5f;
                 robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.VIOLET);
             } else {
@@ -147,31 +166,20 @@ public class BasicTeleOp extends LinearOpMode {
                 if (gamepad1.a) {
                     robot.intakePosition(0.6);
                 } else {
-                    if (gamepad1.b) {
-                        intakePos = 1;
-                    }
+//                    if (gamepad1.b) {
+//                        intakePos = 1;
+//                    }
                     if (gamepad1.y) {
                         intakePos = 2;
                     }
                     if (intakePos == 1) {
-                        robot.intakePosition(0.95);
+                        robot.intakePosition(0.3);
                     }
                     if (intakePos == 2) {
                         robot.intakePosition(0.7);
                     }
                 }
 
-//                tiltToggle = false;
-//                switch (intakePos){
-//                    case "DOWN":
-//                        robot.intakePosition(0.4);
-//                        intakePos = "UP";
-//                        break;
-//                    case "UP":
-//                        robot.intakePosition(0.7);
-//                        intakePos = "DOWN";
-//                        break;
-//                }
                 if (!gamepad1.y) {
                     tiltToggle = true;
                 }
@@ -194,7 +202,7 @@ public class BasicTeleOp extends LinearOpMode {
 //            telemetry.addData("Back Left Drive Encoder", robot.backLeftDrive.getCurrentPosition());
 //            telemetry.addData("Back Right Drive Encoder", robot.backRightDrive.getCurrentPosition());
 
-//            telemetry.addData("Potentiometer:", robot.potentiometer.getVoltage());
+            telemetry.addData("Potentiometer:", robot.potentiometer.getVoltage());
 
                 relativeLayout.post(new Runnable() {
                     public void run() {
