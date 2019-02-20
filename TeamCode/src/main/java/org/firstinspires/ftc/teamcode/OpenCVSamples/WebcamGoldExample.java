@@ -27,91 +27,79 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.Examples;
+package org.firstinspires.ftc.teamcode.OpenCVSamples;
 
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.OpenCV;
 import com.opencv.checkmatecv.detectors.roverrukus.GoldDetector;
+import com.opencv.checkmatecv.filters.CheckmateColorFilter;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Rect;
 
 /**
- *This is an example of how to use the Gold and the VuMark detectors simultaneously. See OpenCVPipeline for more documentation on the relevant methods
+ *
  */
 
-@TeleOp(name="Gold & VuMarks Example", group="OpenCV")
+@TeleOp(name="Webcam Gold Detector", group="OpenCV")
 
-public class GoldAndVuMarkExample extends OpMode {
+public class WebcamGoldExample extends OpMode {
 
-    //Detector object
+    //Webcam object
+    WebcamName webcamName;
+
+    // OpenCV detector
     GoldDetector detector;
 
     @Override
     public void init() {
-        telemetry.addData("Status", "OpenCV - Gold & VuMark Example");
+        telemetry.addData("Status", "OpenCV - Webcam Gold Example");
+
+        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1"); //Retrieves the webcam from the hardware map
+
         detector = new GoldDetector(); // Create a Gold Detector
+
         //Sets the Vuforia license key. ALWAYS SET BEFORE INIT!
         detector.VUFORIA_KEY = "AR5tugH/////AAAAmZWCOAi6Vk4zplw3uCD3PmgKbNphk1fcCZOjab9YzLoNQfafXMjye9dox6cEGiBcmfnWt7eZ8ZOdNUKn10YmfgnbM9ntclwrxuEgimv7R3zusivZOQytR+bzWylYXXovLOi1dsgFu6Rm+rJ95sKy6yn/KkrD5nhhCShwxniD5t5FYkxGC7TY681Tx4jfCdnq4aU7tuzOiPnaG8uhaRElSGelPtIBjmBkSHKE8LxZuza3Aewwm2I/v5p5vPrCmDRJlzkWdCWnFZ4v/jmtZAnpR3lx+zA51ZAd9EGanlLSzKQa5C9BtOr9mfLFBKZNxmORyeWX7btz8prPOCeYQyhwtfn6QjVygV2IrCNh7iyL7838";
 
-        detector.setCAMERA_FORWARD_DISPLACEMENT(7);
-        detector.setCAMERA_LEFT_DISPLACEMENT(0);
-        detector.setCAMERA_VERTICAL_DISPLACEMENT(2);
-
         //Inits the detector. Choose which camera to use, and whether to detect VuMarks here
-        detector.init(hardwareMap.appContext,CameraViewDisplay.getInstance(), OpenCV.CameraMode.BACK, true);
+        detector.init(hardwareMap.appContext,CameraViewDisplay.getInstance(), OpenCV.CameraMode.WEBCAM, false, webcamName);
 
-        //Basic detector settings
+        //Sets basic detector settings
+        detector.yellowFilter = new CheckmateColorFilter(CheckmateColorFilter.ColorPreset.YELLOW, 100); // Create new filter
         detector.useDefaults(); // Use default settings
         detector.areaScoringMethod = OpenCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
         //detector.perfectAreaScorer.perfectArea = 10000; // Uncomment if using PERFECT_AREA scoring
+
         detector.enable();
-        detector.enableVuMarkDetection();
     }
+
     /*
      * Code to run REPEATEDLY when the driver hits INIT
      */
     @Override
     public void init_loop() {
-        telemetry.addLine("Waiting for start...");
-        telemetry.update();
     }
+
     /*
      * Code to run ONCE when the driver hits PLAY
      */
     @Override
-    public void start() { }
+    public void start() {
+    }
+
+
     /*
      * Code to run REPEATEDLY when the driver hits PLAY
      */
     @Override
     public void loop() {
-        //Telemetry feed from VuMark Detector
-        if(detector.isVuMarkVisible()) { //Checks if a VuMark is visible right now
-            telemetry.addData("Visible Target", detector.findVuMark().name()); //Retrieves the name of the current VuMark
-            VectorF translation = detector.getRobotTranslation(); //Obtains current robot location, as a vector in inches
-            if(translation != null) {
-                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-                        translation.get(0), translation.get(1), translation.get(2));
-            }
-            Orientation rotation = detector.getRobotOrientation(); //Obtains current robot orientation, as a set of angles in degrees
-            if(rotation != null) {
-                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            }
-        }
-        else {
-            //No visible VuMark
-            telemetry.addData("Visible Target", "none");
-        }
-        //Gold telemetry feed
-        telemetry.addData("Gold isFound: ", detector.isFound());
+        //Telemetry feed of the found rectangle's location (if one exists)
+        telemetry.addData("IsFound: ", detector.isFound());
         Rect rect = detector.getFoundRect();
         if(detector.isFound()) telemetry.addData("Location: ", Integer.toString((int) (rect.x + rect.width*0.5)) + ", " + Integer.toString((int) (rect.y+0.5*rect.height)));
-
-        // Update telemetry
         telemetry.update();
     }
 
@@ -120,8 +108,7 @@ public class GoldAndVuMarkExample extends OpMode {
      */
     @Override
     public void stop() {
-        detector.disable();
-        super.stop();
+        if (detector != null) detector.disable(); //Make sure to run this on stop!
     }
 
 }

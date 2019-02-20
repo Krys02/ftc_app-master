@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.HardwareConfigs;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,17 +9,16 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class CMHardware
-{
+public class CMHardware {
     /* Public OpMode members. */
-    public DcMotor  leftDrive   = null;
-    public DcMotor  rightDrive  = null;
-    public DcMotor  backLeftDrive = null;
-    public DcMotor  backRightDrive = null;
-    public DcMotor  arm1 = null;
-    public DcMotor  arm2 = null;
-    public DcMotor  actuator1 = null;
-    public DcMotor  actuator2 = null;
+    public DcMotor leftDrive = null;
+    public DcMotor rightDrive = null;
+    public DcMotor backLeftDrive = null;
+    public DcMotor backRightDrive = null;
+    public DcMotor arm1 = null;
+    public DcMotor arm2 = null;
+    public DcMotor actuator1 = null;
+    public DcMotor actuator2 = null;
     public BNO055IMU imu = null;
     public BNO055IMU imu2 = null;
 
@@ -32,16 +30,14 @@ public class CMHardware
 
     public AnalogInput potentiometer = null;
 
-    public RevBlinkinLedDriver blinkin = null;
-    RevBlinkinLedDriver.BlinkinPattern pattern;
-
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
 
     /* Constructor */
-    public CMHardware(){
+    public CMHardware() {
 
     }
+
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap ahwMap, boolean initServos, boolean initIMU, boolean useDriveEncoders) {
         hwMap = ahwMap;
@@ -61,9 +57,9 @@ public class CMHardware
 
         }
         //init Motors
-        leftDrive  = hwMap.get(DcMotor.class, "front_left");
+        leftDrive = hwMap.get(DcMotor.class, "front_left");
         rightDrive = hwMap.get(DcMotor.class, "front_right");
-        backLeftDrive  = hwMap.get(DcMotor.class, "back_left");
+        backLeftDrive = hwMap.get(DcMotor.class, "back_left");
         backRightDrive = hwMap.get(DcMotor.class, "back_right");
         arm1 = hwMap.get(DcMotor.class, "arm1");
         arm2 = hwMap.get(DcMotor.class, "arm2");
@@ -79,11 +75,6 @@ public class CMHardware
 
         //init Sensors
         potentiometer = hwMap.get(AnalogInput.class, "potentiometer");
-
-        //init blinkin
-        blinkin = hwMap.get(RevBlinkinLedDriver.class, "blinkin");
-        pattern = RevBlinkinLedDriver.BlinkinPattern.WHITE;
-//        blinkin.setPattern(pattern);
 
         //set motor powers to 0
         leftDrive.setPower(0);
@@ -106,7 +97,7 @@ public class CMHardware
         arm1.setDirection(DcMotor.Direction.REVERSE);
         arm2.setDirection(DcMotor.Direction.FORWARD);
         actuator1.setDirection(DcMotor.Direction.REVERSE);
-        actuator2.setDirection(DcMotor.Direction.REVERSE  );
+        actuator2.setDirection(DcMotor.Direction.REVERSE);
 
         //set CR servo directions
         intake.setDirection(CRServo.Direction.FORWARD);
@@ -153,21 +144,24 @@ public class CMHardware
     }
 
     //Control both arm motors together
-    public void armPower(double power){
+    public void armPower(double power) {
         arm1.setPower(power);
         arm2.setPower(power);
     }
-    public void driveMotorPower(double power){
+
+    public void driveMotorPower(double power) {
         leftDrive.setPower(power);
         rightDrive.setPower(power);
         backRightDrive.setPower(power);
         backLeftDrive.setPower(power);
     }
-    public void intakeSpeed(double power){
+
+    public void intakeSpeed(double power) {
         intake.setPower(-power);
     }
-    public void gatePosition(String position){
-        switch (position){
+
+    public void gatePosition(String position) {
+        switch (position) {
             case "OPEN":
                 gate.setPosition(0.95);
                 break;
@@ -176,17 +170,20 @@ public class CMHardware
                 break;
         }
     }
-    public void intakePosition(double position){
+
+    public void intakePosition(double position) {
         intakeTiltLeft.setPosition(position);
         intakeTiltRight.setPosition(1 - position);
     }
-    public void motorRotate(double speed){
+
+    public void motorRotate(double speed) {
         leftDrive.setPower(speed);
         backLeftDrive.setPower(speed);
         backRightDrive.setPower(-speed);
         rightDrive.setPower(-speed);
     }
-    public void actuatorPower(double speed){
+
+    public void actuatorPower(double speed) {
         actuator1.setPower(speed);
         actuator2.setPower(speed);
     }

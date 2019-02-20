@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Examples;
+package org.firstinspires.ftc.teamcode.OpenCVSamples;
 
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.detectors.OpenCVDetector;

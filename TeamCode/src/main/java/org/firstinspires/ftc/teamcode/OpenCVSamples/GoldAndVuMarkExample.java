@@ -27,49 +27,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.Examples;
+package org.firstinspires.ftc.teamcode.OpenCVSamples;
 
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.OpenCV;
-import com.opencv.checkmatecv.detectors.roverrukus.VuMarkDetector;
+import com.opencv.checkmatecv.detectors.roverrukus.GoldDetector;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.opencv.core.Rect;
 
 /**
  *This is an example of how to use the Gold and the VuMark detectors simultaneously. See OpenCVPipeline for more documentation on the relevant methods
  */
 
-@TeleOp(name="VuMarks Example", group="OpenCV")
+@TeleOp(name="Gold & VuMarks Example", group="OpenCV")
 
-public class VuMarksExample extends OpMode {
+public class GoldAndVuMarkExample extends OpMode {
 
     //Detector object
-    VuMarkDetector detector;
+    GoldDetector detector;
 
     @Override
     public void init() {
-        telemetry.addData("Status", "OpenCV - VuMarks Example");
-        detector = new VuMarkDetector(); // Create a Gold Detector
-
+        telemetry.addData("Status", "OpenCV - Gold & VuMark Example");
+        detector = new GoldDetector(); // Create a Gold Detector
         //Sets the Vuforia license key. ALWAYS SET BEFORE INIT!
         detector.VUFORIA_KEY = "AR5tugH/////AAAAmZWCOAi6Vk4zplw3uCD3PmgKbNphk1fcCZOjab9YzLoNQfafXMjye9dox6cEGiBcmfnWt7eZ8ZOdNUKn10YmfgnbM9ntclwrxuEgimv7R3zusivZOQytR+bzWylYXXovLOi1dsgFu6Rm+rJ95sKy6yn/KkrD5nhhCShwxniD5t5FYkxGC7TY681Tx4jfCdnq4aU7tuzOiPnaG8uhaRElSGelPtIBjmBkSHKE8LxZuza3Aewwm2I/v5p5vPrCmDRJlzkWdCWnFZ4v/jmtZAnpR3lx+zA51ZAd9EGanlLSzKQa5C9BtOr9mfLFBKZNxmORyeWX7btz8prPOCeYQyhwtfn6QjVygV2IrCNh7iyL7838";
 
-        detector.setCAMERA_FORWARD_DISPLACEMENT(4); //eg: Camera is 4 inches in front of robot center
-        detector.setCAMERA_LEFT_DISPLACEMENT(0); //eg: Camera is ON the robot's center line
-        detector.setCAMERA_VERTICAL_DISPLACEMENT(6); //eg: Camera is 6 inches above the ground
+        detector.setCAMERA_FORWARD_DISPLACEMENT(7);
+        detector.setCAMERA_LEFT_DISPLACEMENT(0);
+        detector.setCAMERA_VERTICAL_DISPLACEMENT(2);
 
         //Inits the detector. Choose which camera to use, and whether to detect VuMarks here
         detector.init(hardwareMap.appContext,CameraViewDisplay.getInstance(), OpenCV.CameraMode.BACK, true);
 
         //Basic detector settings
         detector.useDefaults(); // Use default settings
+        detector.areaScoringMethod = OpenCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
+        //detector.perfectAreaScorer.perfectArea = 10000; // Uncomment if using PERFECT_AREA scoring
         detector.enable();
         detector.enableVuMarkDetection();
     }
-
     /*
      * Code to run REPEATEDLY when the driver hits INIT
      */
@@ -78,14 +79,11 @@ public class VuMarksExample extends OpMode {
         telemetry.addLine("Waiting for start...");
         telemetry.update();
     }
-
     /*
      * Code to run ONCE when the driver hits PLAY
      */
     @Override
-    public void start() {
-    }
-
+    public void start() { }
     /*
      * Code to run REPEATEDLY when the driver hits PLAY
      */
@@ -108,6 +106,11 @@ public class VuMarksExample extends OpMode {
             //No visible VuMark
             telemetry.addData("Visible Target", "none");
         }
+        //Gold telemetry feed
+        telemetry.addData("Gold isFound: ", detector.isFound());
+        Rect rect = detector.getFoundRect();
+        if(detector.isFound()) telemetry.addData("Location: ", Integer.toString((int) (rect.x + rect.width*0.5)) + ", " + Integer.toString((int) (rect.y+0.5*rect.height)));
+
         // Update telemetry
         telemetry.update();
     }
@@ -119,7 +122,6 @@ public class VuMarksExample extends OpMode {
     public void stop() {
         detector.disable();
         super.stop();
-
     }
 
 }

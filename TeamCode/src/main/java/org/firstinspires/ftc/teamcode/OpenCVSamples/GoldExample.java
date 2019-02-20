@@ -27,43 +27,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.Examples;
+package org.firstinspires.ftc.teamcode.OpenCVSamples;
 
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.OpenCV;
-import com.opencv.checkmatecv.detectors.roverrukus.SamplingOrderDetector;
-import com.opencv.checkmatecv.filters.CheckmateColorFilter;
+import com.opencv.checkmatecv.detectors.roverrukus.GoldDetector;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.opencv.core.Rect;
 
 
-@TeleOp(name="Sampling Order Example", group="OpenCV")
+@TeleOp(name="Gold Example", group="OpenCV")
 
-public class SamplingOrderExample extends OpMode {
+public class GoldExample extends OpMode
+{
     // Detector object
-    private SamplingOrderDetector detector;
-
+    private GoldDetector detector;
 
     @Override
     public void init() {
-        telemetry.addData("Status", "OpenCV - Sampling Order Example");
-
-        // Setup detector
-        detector = new SamplingOrderDetector(); // Create the detector
-        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance()); // Initialize detector with app context and camera
+        telemetry.addData("Status", "OpenCV - Gold Example");
+        // Set up detector
+        detector = new GoldDetector(); // Create detector
+        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance()); // Initialize it with the app context and camera
         detector.useDefaults(); // Set detector to use default settings
 
-        detector.downscale = 0.4; // How much to downscale the input frames
-        detector.whiteFilter = new CheckmateColorFilter(CheckmateColorFilter.ColorPreset.WHITE);
         // Optional tuning
+        detector.downscale = 0.4; // How much to downscale the input frames
+
         detector.areaScoringMethod = OpenCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
-        //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
-        detector.maxAreaScorer.weight = 0.001;
+        detector.maxAreaScorer.weight = 0.005; //
 
-        detector.ratioScorer.weight = 15;
-        detector.ratioScorer.perfectRatio = 1.0;
+        detector.ratioScorer.weight = 5; //
+        detector.ratioScorer.perfectRatio = 1.0; // Ratio adjustment
 
-        detector.enable(); // Start detector
+        detector.enable(); // Start the detector!
     }
 
     /*
@@ -78,17 +76,17 @@ public class SamplingOrderExample extends OpMode {
      */
     @Override
     public void start() {
-
     }
-
 
     /*
      * Code to run REPEATEDLY when the driver hits PLAY
      */
     @Override
     public void loop() {
-        telemetry.addData("Current Order" , detector.getCurrentOrder().toString()); // The current result for the frame
-        telemetry.addData("Last Order" , detector.getLastOrder().toString()); // The last known result
+        telemetry.addData("IsFound: ", detector.isFound());
+        Rect rect = detector.getFoundRect();
+        if(detector.isFound()) telemetry.addData("Location: ", Integer.toString((int) (rect.x + rect.width*0.5)) + ", " + Integer.toString((int) (rect.y+0.5*rect.height)));
+        telemetry.update();
     }
 
     /*
@@ -96,7 +94,7 @@ public class SamplingOrderExample extends OpMode {
      */
     @Override
     public void stop() {
+        // Disable the detector
         if(detector != null) detector.disable();
     }
-
 }

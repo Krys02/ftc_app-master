@@ -27,38 +27,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.Examples;
+package org.firstinspires.ftc.teamcode.OpenCVSamples;
 
 import com.opencv.checkmatecv.CameraViewDisplay;
-import com.opencv.checkmatecv.detectors.roverrukus.HoughSilverDetector;
+import com.opencv.checkmatecv.OpenCV;
+import com.opencv.checkmatecv.detectors.roverrukus.SilverDetector;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.opencv.core.Size;
 
-@TeleOp(name="Hough Silver Example", group="OpenCV")
 
-public class HoughSilverExample extends OpMode
-{
-    //Detector object
-    private HoughSilverDetector detector;
+@TeleOp(name="Silver Example", group="OpenCV")
 
+public class SilverExample extends OpMode {
+    // Detector object
+    private SilverDetector detector;
 
     @Override
     public void init() {
-        telemetry.addData("Status", "OpenCV - Gold SilverDetector Example");
+        telemetry.addData("Status", "OpenCV - Silver Detector Example");
 
-        detector = new HoughSilverDetector(); //Create detector
-        detector.downscale = 1; //Increase detector sensitivity with smaller size. Make sure to preserve aspect ratio.
-        detector.useFixedDownscale = false; //Don't fix the downscale
-        detector.sensitivity = 1.6; //Play with this based on your camera, adjusts how sensitive the detector is
-        detector.minDistance = 60; //Minimum distance between silver mineral centers in pixels
-        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance()); //Initialize detector with app context and camera
-        detector.useDefaults(); //Use default settings
-        
-        // Optional Tuning
+        // Setup detector
+        detector = new SilverDetector(); // Create detector
+        detector.setAdjustedSize(new Size(480, 270)); // Set detector size
+        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance()); // Initialize detector with app context and camera
+        detector.useDefaults(); // Set default detector settings
+        // Optional tuning
+
         detector.downscale = 0.4; // How much to downscale the input frames
 
-        detector.enable(); //Start the detector
+        detector.areaScoringMethod = OpenCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
+        //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
+        detector.maxAreaScorer.weight = 0.005;
+
+        detector.ratioScorer.weight = 5;
+        detector.ratioScorer.perfectRatio = 1.0;
+        detector.enable(); // Start detector
     }
 
     /*
@@ -76,7 +81,6 @@ public class HoughSilverExample extends OpMode
 
     }
 
-
     /*
      * Code to run REPEATEDLY when the driver hits PLAY
      */
@@ -90,7 +94,7 @@ public class HoughSilverExample extends OpMode
      */
     @Override
     public void stop() {
-        if(detector != null) detector.disable();
+        if(detector != null) detector.disable(); //Make sure to run this on stop!
     }
 
 }
