@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.OpenCVSamples;
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.OpenCV;
 import com.opencv.checkmatecv.detectors.roverrukus.VuMarkDetector;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -43,7 +44,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
  */
 
 @TeleOp(name="VuMarks Example", group="OpenCV")
-
+@Disabled
 public class VuMarksExample extends OpMode {
 
     //Detector object

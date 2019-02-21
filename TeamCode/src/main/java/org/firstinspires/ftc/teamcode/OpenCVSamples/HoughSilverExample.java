@@ -31,12 +31,13 @@ package org.firstinspires.ftc.teamcode.OpenCVSamples;
 
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.detectors.roverrukus.HoughSilverDetector;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 @TeleOp(name="Hough Silver Example", group="OpenCV")
-
+@Disabled
 public class HoughSilverExample extends OpMode
 {
     //Detector object

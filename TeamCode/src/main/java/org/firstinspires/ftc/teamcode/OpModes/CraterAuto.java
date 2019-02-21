@@ -16,10 +16,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.HardwareConfigs.CMHardware;
 import org.firstinspires.ftc.teamcode.PID.PIDController;
 
-@Autonomous(name = "Red Crater Autonomous", group = "Autonomous")
-public class RedCraterAuto extends LinearOpMode {
+@Autonomous(name = "Crater Autonomous", group = "Autonomous")
+public class CraterAuto extends LinearOpMode {
 
-    private String autoPath = "CRATER";
     private CMHardware robot = new CMHardware();
     private GoldAlignDetector detector;
 
@@ -28,7 +27,7 @@ public class RedCraterAuto extends LinearOpMode {
 
     private static final double WHEEL_DIAMETER_INCHES = 6.0;
     private static final double COUNTS_PER_INCH = (868.4) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
+            (WHEEL_DIAMETER_INCHES * 3.14159265358979323);
 
     // IMU Variables
     private Orientation angles;
@@ -48,13 +47,23 @@ public class RedCraterAuto extends LinearOpMode {
         teleUpdate("Initializing Electronics");
 
         robot.init(hardwareMap, false, true, true);
-
+        robot.physicalStop.setPosition(0);
+        robot.gatePosition("CLOSE");
+        robot.marker.setPosition(0.6);
         while (!isStopRequested() && !robot.imu.isGyroCalibrated() && opModeIsActive()) {
             sleep(50);
             idle();
             teleUpdate("Calibrating IMU");
         }
+        if (!isStopRequested()) {
+            teleUpdate("Setting up PID Controller");
+            pidRotate = new PIDController(.005, 0, 0);
 
+            // Set PID proportional value to produce non-zero correction value when robot veers off
+            // straight line. P value controls how sensitive the correction is.
+            pidDrive = new PIDController(.05, 0, 0);
+            sleep(200);
+        }
 //        robot.intakePosition(0.05);
         if (!isStopRequested()) {
             detector = new GoldAlignDetector();
@@ -68,10 +77,11 @@ public class RedCraterAuto extends LinearOpMode {
             teleUpdate("Setting up OpenCV Detector");
             detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
             detector.useDefaults();
+            sleep(200);
         }
         if (!isStopRequested()) {
             teleUpdate("Tuning OpenCV Detector");
-            detector.alignSize = 100; // How wide (in pixels) is the range in which the gold object will be aligned.
+            detector.alignSize = 300; // How wide (in pixels) is the range in which the gold object will be aligned.
             detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
             detector.downscale = 0.4;
             sleep(200);
@@ -81,20 +91,20 @@ public class RedCraterAuto extends LinearOpMode {
             detector.areaScoringMethod = OpenCV.AreaScoringMethod.MAX_AREA;
             //detector.perfectAreaScorer.perfectArea = 10000;
             detector.maxAreaScorer.weight = 0.005;
-            sleep(100);
+            sleep(200);
         }
         if (!isStopRequested()) {
             teleUpdate("Adjusting OpenCV Scorer");
             detector.ratioScorer.weight = 5; //
             detector.ratioScorer.perfectRatio = 1.0; // Ratio adjustment
-            sleep(100);
+            sleep(200);
         }
 
         if (!isStopRequested()) {
             teleUpdate("Enabling OpenCV");
             detector.enable();
 //            detector.enableVuMarkDetection();
-            sleep(100);
+            sleep(200);
         }
 
 
@@ -104,10 +114,16 @@ public class RedCraterAuto extends LinearOpMode {
 
         waitForStart();
 
+        pidDrive.setSetpoint(0);
+        pidDrive.setOutputRange(0, power);
+        pidDrive.setInputRange(-90, 90);
+        pidDrive.enable();
+
         if (opModeIsActive() && !isStopRequested()) {
             teleUpdate("Ejecting Stop");
-            // DRIVE MOTORS BACK TO EJECT STOP
+            // DRIVE MOTORS BACK TO LIFT STOP
             robot.armPower(0.5);
+            robot.physicalStop.setPosition(1);
             sleep(300);
             robot.armPower(0);
             teleUpdate("Landing");
@@ -123,19 +139,22 @@ public class RedCraterAuto extends LinearOpMode {
         resetAngle(); // reset heading
         robot.intakePosition(0.3);
         teleUpdate("Strafing off Latch");
-        encoderStrafe(1, -8, -8, 5);
+        encoderStrafe(0.5, -5, -5, 5);
         teleUpdate("Driving Forward");
         runtime.reset();
         resetEncoders();
         power = 0.5;
-        runToPos(0.5, 650, 3);
+        runToPos(0.3, 620, 3);
         teleUpdate("Lowering Arm");
-        while (robot.potentiometer.getVoltage() < 2.075 && !isStopRequested() && opModeIsActive()) {
+        runtime.reset();
+        while (robot.potentiometer.getVoltage() < 2.075 && !isStopRequested() && opModeIsActive() && runtime.seconds() < 1) {
             robot.armPower(0.5);
         }
         robot.armPower(0);
-        encoderStrafe(1, 9, 9, 5);
+        teleUpdate("Sampling");
+        encoderStrafe(.2, 5, 5, 5);
         globalAngle -= 135;
+//        rotate(((13*100)*0)+135, 0.5);
         runtime.reset();
         while (opModeIsActive() && !isStopRequested() && runtime.seconds() < 1.5) {
             telemetry.addData("1 imu heading", lastAngles.firstAngle);
@@ -149,7 +168,7 @@ public class RedCraterAuto extends LinearOpMode {
         }
         robot.driveMotorPower(0);
         sleep(200);
-        if (detector.isFound()){
+        if (detector.getAligned()) {
             goldPos = "RIGHT";
             while (robot.potentiometer.getVoltage() > 1.35 && !isStopRequested() && opModeIsActive()) {
                 robot.armPower(-0.5);
@@ -157,9 +176,9 @@ public class RedCraterAuto extends LinearOpMode {
             robot.armPower(0);
             telemetry.addData("Gold Mineral Found at ", goldPos);
             resetEncoders();
-            runToPos(0.5, 280, 2);
-            while (robot.potentiometer.getVoltage() > 0.5 && !isStopRequested() && opModeIsActive()) {
-                robot.armPower(-0.5);
+            runToPos(0.3, 300, 2);
+            while (robot.potentiometer.getVoltage() > 0.45 && !isStopRequested() && opModeIsActive()) {
+                robot.armPower(-0.8);
             }
             robot.armPower(0);
             robot.intakePosition(0.7);
@@ -168,23 +187,25 @@ public class RedCraterAuto extends LinearOpMode {
             runToPos(0.3, -100, 2);
             sleep(100);
             runToPos(0.3, 0, 2);
-            robot.intakePosition(0.3);
-            while (robot.potentiometer.getVoltage() < 2.075 && !isStopRequested() && opModeIsActive()) {
+            while (robot.potentiometer.getVoltage() < 1.4 && !isStopRequested() && opModeIsActive()) {
                 robot.armPower(1);
             }
-            robot.armPower(0);
             robot.intakeSpeed(0);
-
-            if (detector.isFound()){
-                resetEncoders();
-                runToPos(0.5, -800, 5);
-                runToPos(0.5, 400, 5);
-            }
-
-        } else {
-            globalAngle -= 45;
+            robot.armPower(0);
             runtime.reset();
-            while (opModeIsActive() && !isStopRequested() && runtime.seconds() < 1) {
+            while (runtime.seconds() < 1.8 && opModeIsActive() && !isStopRequested()) {
+                if (isStopRequested()) {
+                    break;
+                }
+                robot.actuator1.setPower(1);
+                robot.actuator2.setPower(1);
+            }
+            robot.actuator1.setPower(0);
+            robot.actuator2.setPower(0);
+            resetEncoders();
+            globalAngle -= 32;
+            runtime.reset();
+            while (opModeIsActive() && !isStopRequested() && runtime.seconds() < 0.5 ) {
                 telemetry.addData("1 imu heading", lastAngles.firstAngle);
                 telemetry.addData("2 global heading", globalAngle);
                 telemetry.addData("3 correction", correction);
@@ -195,15 +216,168 @@ public class RedCraterAuto extends LinearOpMode {
                 robot.backRightDrive.setPower(-correction);
             }
             robot.driveMotorPower(0);
-            sleep(200);
-            if (detector.isFound() && detector.getXPosition() > 150){
+//            runToPos(0.5, 750, 4);
+            encoderDrive(0.3, 18, 18, 5);
+
+            robot.driveMotorPower(0);
+            robot.intakePosition(0.6);
+            robot.gatePosition("OPEN");
+            sleep(300);
+            while (robot.potentiometer.getVoltage() > 1.54 && !isStopRequested() && opModeIsActive()) {
+                robot.armPower(-0.25);
+            }
+            robot.intakeSpeed(0);
+            robot.armPower(0);
+            resetEncoders();
+            runToPos(0.25, -750, 4);
+            robot.intakePosition(0.7);
+            runtime.reset();
+            while (runtime.seconds() < 1.8 && opModeIsActive() && !isStopRequested()) {
+                if (isStopRequested()) {
+                    break;
+                }
+                robot.actuator1.setPower(-1);
+                robot.actuator2.setPower(-1);
+            }
+            robot.actuator1.setPower(0);
+            robot.actuator2.setPower(0);
+            robot.gatePosition("CLOSE");
+//            robot.intakePosition(0.3);
+            while (robot.potentiometer.getVoltage() < 2.075 && !isStopRequested() && opModeIsActive()) {
+                robot.armPower(1);
+            }
+            robot.armPower(0);
+            resetAngle();
+//            globalAngle += 70;
+//            runtime.reset();
+//            while (opModeIsActive() && !isStopRequested() && runtime.seconds() < 1.2) {
+//                telemetry.addData("1 imu heading", lastAngles.firstAngle);
+//                telemetry.addData("2 global heading", globalAngle);
+//                telemetry.addData("3 correction", correction);
+//                correction = checkDirection();
+//                robot.leftDrive.setPower(correction);
+//                robot.backLeftDrive.setPower(correction);
+//                robot.rightDrive.setPower(-correction);
+//                robot.backRightDrive.setPower(-correction);
+//            }
+//            robot.driveMotorPower(0);
+            encoderDrive(0.5, 22, -22, 3);
+            resetAngle();
+            resetEncoders();
+//            runToPos(0.5, 1500, 5);
+            power = 0.6;
+            while (opModeIsActive() && robot.leftDrive.getCurrentPosition() < 1280) {
+                telemetry.addData("1 imu heading", lastAngles.firstAngle);
+                telemetry.addData("2 global heading", globalAngle);
+                telemetry.addData("3 correction", correction);
+                telemetry.update();
+                correction = checkDirection();
+                robot.leftDrive.setPower(power + correction);
+                robot.backLeftDrive.setPower(power + correction);
+                robot.rightDrive.setPower(power - correction);
+                robot.backRightDrive.setPower(power - correction);
+            }
+            globalAngle -= 30;
+            resetEncoders();
+            power = 0.6;
+            while (opModeIsActive() && robot.leftDrive.getCurrentPosition() < 250) {
+                telemetry.addData("1 imu heading", lastAngles.firstAngle);
+                telemetry.addData("2 global heading", globalAngle);
+                telemetry.addData("3 correction", correction);
+                telemetry.update();
+                correction = checkDirection();
+                robot.leftDrive.setPower(power + correction);
+                robot.backLeftDrive.setPower(power + correction);
+                robot.rightDrive.setPower(power - correction);
+                robot.backRightDrive.setPower(power - correction);
+            }
+            globalAngle -=10;
+            while (opModeIsActive() && robot.leftDrive.getCurrentPosition() < 260) {
+                telemetry.addData("1 imu heading", lastAngles.firstAngle);
+                telemetry.addData("2 global heading", globalAngle);
+                telemetry.addData("3 correction", correction);
+                telemetry.update();
+                correction = checkDirection();
+                robot.leftDrive.setPower(power + correction);
+                robot.backLeftDrive.setPower(power + correction);
+                robot.rightDrive.setPower(power - correction);
+                robot.backRightDrive.setPower(power - correction);
+            }
+            globalAngle -=15;
+            resetEncoders();
+            while (opModeIsActive() && robot.leftDrive.getCurrentPosition() < 850) {
+                telemetry.addData("1 imu heading", lastAngles.firstAngle);
+                telemetry.addData("2 global heading", globalAngle);
+                telemetry.addData("3 correction", correction);
+                telemetry.update();
+                correction = checkDirection();
+                robot.leftDrive.setPower(power + correction);
+                robot.backLeftDrive.setPower(power + correction);
+                robot.rightDrive.setPower(power - correction);
+                robot.backRightDrive.setPower(power - correction);
+            }
+//            encoderStrafe(1, -8, -8, 5);
+            robot.marker.setPosition(0);
+            encoderDrive(1, -15, 15, 2);
+            sleep(500);
+//            encoderDrive(1, 15, -15, 2);
+//            encoderStrafe(1, 8, 8, 5);
+            resetEncoders();
+            runtime.reset();
+            robot.marker.setPosition(0.7);
+            while (opModeIsActive() && robot.leftDrive.getCurrentPosition() > -2000) {
+                telemetry.addData("1 imu heading", lastAngles.firstAngle);
+                telemetry.addData("2 global heading", globalAngle);
+                telemetry.addData("3 correction", correction);
+                telemetry.update();
+                correction = checkDirection();
+                robot.leftDrive.setPower(-power + correction);
+                robot.backLeftDrive.setPower(-power + correction);
+                robot.rightDrive.setPower(-power - correction);
+                robot.backRightDrive.setPower(-power - correction);
+                if (robot.potentiometer.getVoltage() > 0.6 && !isStopRequested() && opModeIsActive()) {
+                    robot.armPower(-0.5);
+                } else {
+                    robot.armPower(0);
+                }
+                if (runtime.seconds() < 1) {
+                    robot.actuatorPower(1);
+                } else {
+                    robot.actuatorPower(0);
+                }
+            }
+            robot.actuatorPower(0);
+            robot.driveMotorPower(0);
+            while (robot.potentiometer.getVoltage() > 0.45 && !isStopRequested() && opModeIsActive()) {
+                robot.armPower(-0.5);
+            }
+        } else
+
+        {
+            globalAngle -= 45;
+            runtime.reset();
+            while (opModeIsActive() && !isStopRequested() && runtime.seconds() < 1.5) {
+                telemetry.addData("1 imu heading", lastAngles.firstAngle);
+                telemetry.addData("2 global heading", globalAngle);
+                telemetry.addData("3 correction", correction);
+                correction = checkDirection();
+                robot.leftDrive.setPower(power + correction);
+                robot.backLeftDrive.setPower(power + correction);
+                robot.rightDrive.setPower(power - correction);
+                robot.backRightDrive.setPower(power - correction);
+            }
+//            rotate(((13*100)*0)+45, 0.5);
+            robot.driveMotorPower(0);
+            sleep(300);
+            if (detector.getAligned()) {
                 goldPos = "CENTER";
                 while (robot.potentiometer.getVoltage() > 1.35 && !isStopRequested() && opModeIsActive()) {
                     robot.armPower(-0.5);
                 }
+                //50
                 robot.armPower(0);
                 resetEncoders();
-                runToPos(0.3, 600, 3);
+                runToPos(0.3, 650, 3);
                 while (robot.potentiometer.getVoltage() > 0.5 && !isStopRequested() && opModeIsActive()) {
                     robot.armPower(-0.5);
                 }
@@ -220,8 +394,8 @@ public class RedCraterAuto extends LinearOpMode {
                 robot.intakeSpeed(0);
                 robot.armPower(0);
                 runtime.reset();
-                while (runtime.seconds() < 1.8 && opModeIsActive() && !isStopRequested()){
-                    if (isStopRequested()){
+                while (runtime.seconds() < 1.8 && opModeIsActive() && !isStopRequested()) {
+                    if (isStopRequested()) {
                         break;
                     }
                     robot.actuator1.setPower(1);
@@ -230,7 +404,7 @@ public class RedCraterAuto extends LinearOpMode {
                 robot.actuator1.setPower(0);
                 robot.actuator2.setPower(0);
                 resetEncoders();
-                globalAngle += 20;
+                globalAngle += 15;
                 runtime.reset();
                 while (opModeIsActive() && !isStopRequested() && runtime.seconds() < 1.2) {
                     telemetry.addData("1 imu heading", lastAngles.firstAngle);
@@ -243,16 +417,17 @@ public class RedCraterAuto extends LinearOpMode {
                     robot.backRightDrive.setPower(-correction);
                 }
                 robot.driveMotorPower(0);
-                runToPos(0.2, 650, 4);
+//                rotate(((13*100)*0)+45, 0.5);
+                runToPos(0.2, 700, 4);
 
                 robot.driveMotorPower(0);
                 robot.gatePosition("OPEN");
-                sleep(200);
+                sleep(1000);
                 resetEncoders();
-                runToPos(0.2, -600, 4);
+                encoderDrive(0.3, 15, 15, 2);
                 runtime.reset();
-                while (runtime.seconds() < 1.8 && opModeIsActive() && !isStopRequested()){
-                    if (isStopRequested()){
+                while (runtime.seconds() < 1.8 && opModeIsActive() && !isStopRequested()) {
+                    if (isStopRequested()) {
                         break;
                     }
                     robot.actuator1.setPower(-1);
@@ -312,7 +487,7 @@ public class RedCraterAuto extends LinearOpMode {
                 robot.armPower(0);
                 robot.intakeSpeed(0);
 
-                if (detector.isFound()){
+                if (detector.isFound()) {
                     resetEncoders();
                     runToPos(0.5, -800, 5);
                     runToPos(0.5, 400, 5);
@@ -677,8 +852,7 @@ public class RedCraterAuto extends LinearOpMode {
      *
      * @param degrees Degrees to turn, + is cw - is ccw
      */
-    private void rotate(int degrees, double power)
-    {
+    private void rotate(int degrees, double power) {
         // restart imu angle tracking.
         resetAngle();
 
@@ -695,8 +869,8 @@ public class RedCraterAuto extends LinearOpMode {
         pidRotate.reset();
         pidRotate.setSetpoint(degrees);
         pidRotate.setInputRange(0, 90);
-        pidRotate.setOutputRange(.05, power);
-        pidRotate.setTolerance(2);
+        pidRotate.setOutputRange(.1, power);
+        pidRotate.setTolerance(4);
         pidRotate.enable();
 
         // getAngle() returns + when rotating counter clockwise (left) and - when rotating
@@ -704,35 +878,39 @@ public class RedCraterAuto extends LinearOpMode {
 
         // rotate until turn is completed.
 
-        if (degrees < 0)
-        {
+        if (degrees < 0) {
             // On right turn we have to get off zero first.
-            while (opModeIsActive() && getAngle() == 0)
-            {
+            while (opModeIsActive() && getAngle() == 0) {
                 robot.leftDrive.setPower(power);
                 robot.rightDrive.setPower(-power);
                 robot.backLeftDrive.setPower(power);
                 robot.backRightDrive.setPower(-power);
+                telemetry.addData("Status:", "Rotating");
+                telemetry.addData("Power:", power);
+                telemetry.update();
                 sleep(100);
             }
 
-            do
-            {
+            do {
                 power = pidRotate.performPID(getAngle()); // power will be - on right turn.
                 robot.leftDrive.setPower(-power);
                 robot.rightDrive.setPower(power);
                 robot.backLeftDrive.setPower(-power);
                 robot.backRightDrive.setPower(power);
+                telemetry.addData("Status:", "Rotating");
+                telemetry.addData("Power:", power);
+                telemetry.update();
             } while (opModeIsActive() && !pidRotate.onTarget());
-        }
-        else    // left turn.
-            do
-            {
+        } else    // left turn.
+            do {
                 power = pidRotate.performPID(getAngle()); // power will be + on left turn.
                 robot.leftDrive.setPower(-power);
                 robot.rightDrive.setPower(power);
                 robot.backLeftDrive.setPower(-power);
                 robot.backRightDrive.setPower(power);
+                telemetry.addData("Status:", "Rotating");
+                telemetry.addData("Power:", power);
+                telemetry.update();
             } while (opModeIsActive() && !pidRotate.onTarget());
 
         // turn the motors off.
@@ -749,7 +927,8 @@ public class RedCraterAuto extends LinearOpMode {
         telemetry.addData("Status:", status);
         telemetry.update();
     }
-    private void resetEncoders(){
+
+    private void resetEncoders() {
         robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.backLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -759,7 +938,8 @@ public class RedCraterAuto extends LinearOpMode {
         robot.backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    private void runToPos(double speed, int target, double timeoutS){
+
+    private void runToPos(double speed, int target, double timeoutS) {
         robot.leftDrive.setTargetPosition(target);
         robot.rightDrive.setTargetPosition(target);
         robot.backLeftDrive.setTargetPosition(target);
@@ -778,17 +958,13 @@ public class RedCraterAuto extends LinearOpMode {
         robot.backLeftDrive.setPower(Math.abs(speed) + correction);
         robot.backRightDrive.setPower(Math.abs(speed) - correction);
 
-        robot.leftDrive.setPower(power + correction);
-        robot.backLeftDrive.setPower(power + correction);
-        robot.rightDrive.setPower(power - correction);
-        robot.backRightDrive.setPower(power - correction);
-
         while (opModeIsActive() &&
                 (runtime.seconds() < timeoutS) &&
                 (robot.leftDrive.isBusy() && robot.rightDrive.isBusy() &&
                         robot.backLeftDrive.isBusy() && robot.backRightDrive.isBusy() && !isStopRequested())) {
 
             correction = checkDirection();
+//            correction = 0;
 
             telemetry.addData("1 imu heading", lastAngles.firstAngle);
             telemetry.addData("2 global heading", globalAngle);

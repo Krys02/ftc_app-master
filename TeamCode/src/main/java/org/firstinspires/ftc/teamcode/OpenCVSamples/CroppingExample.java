@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OpenCVSamples;
 
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.detectors.OpenCVDetector;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -12,6 +13,7 @@ import org.opencv.core.Point;
  * This class is useful for finding the size you want to crop your camera image to.
  */
 @TeleOp(name = "Cropping Example", group = "OpenCV")
+@Disabled
 public class CroppingExample extends OpMode {
 
     //This is an example of an anonymous implementation of the OpenCV Detector

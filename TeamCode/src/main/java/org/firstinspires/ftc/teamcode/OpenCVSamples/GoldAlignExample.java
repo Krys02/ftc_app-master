@@ -32,12 +32,13 @@ package org.firstinspires.ftc.teamcode.OpenCVSamples;
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.OpenCV;
 import com.opencv.checkmatecv.detectors.roverrukus.GoldAlignDetector;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 @TeleOp(name="Gold Align Example", group="OpenCV")
-
+@Disabled
 public class GoldAlignExample extends OpMode
 {
     // Detector object

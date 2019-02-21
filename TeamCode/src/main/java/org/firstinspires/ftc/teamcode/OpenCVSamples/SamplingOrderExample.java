@@ -33,12 +33,13 @@ import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.OpenCV;
 import com.opencv.checkmatecv.detectors.roverrukus.SamplingOrderDetector;
 import com.opencv.checkmatecv.filters.CheckmateColorFilter;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 @TeleOp(name="Sampling Order Example", group="OpenCV")
-
+@Disabled
 public class SamplingOrderExample extends OpMode {
     // Detector object
     private SamplingOrderDetector detector;

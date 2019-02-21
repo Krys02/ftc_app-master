@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.OpenCVSamples;
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.OpenCV;
 import com.opencv.checkmatecv.detectors.roverrukus.SilverDetector;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -39,7 +40,7 @@ import org.opencv.core.Size;
 
 
 @TeleOp(name="Silver Example", group="OpenCV")
-
+@Disabled
 public class SilverExample extends OpMode {
     // Detector object
     private SilverDetector detector;

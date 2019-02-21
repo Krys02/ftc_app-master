@@ -52,6 +52,8 @@ public class BasicTeleOp extends LinearOpMode {
         boolean tiltToggle = true;
         boolean gateToggle = true;
         int intakePos = 0;
+        boolean stopToggle = true;
+        int stopEngaged = 0;
         // string stuffs
         String actuatorDirection = "STOP";
         // String teamColor = "BLUE";
@@ -71,10 +73,31 @@ public class BasicTeleOp extends LinearOpMode {
         waitForStart();
 
         robot.gatePosition("CLOSE");
+        robot.physicalStop.setPosition(1);
+        intakePos = 2;
+        robot.intakePosition(0.7);
 
         while (opModeIsActive()) {
 
             telemetry.addData("Status:", "Running");
+
+            if (!gamepad1.y){
+                stopToggle = true;
+            }
+            if (gamepad1.y && stopToggle){
+                stopToggle = false;
+                switch (stopEngaged) {
+                    case 0:
+                        robot.physicalStop.setPosition(1);
+                        stopEngaged = 1;
+                        break;
+                    case 1:
+                        robot.physicalStop.setPosition(0);
+                        stopEngaged = 0;
+                        break;
+                }
+            }
+
 
             speed = -gamepad1.left_stick_y;
             strafeSpeed = gamepad1.left_stick_x;
@@ -161,9 +184,9 @@ public class BasicTeleOp extends LinearOpMode {
 //                    if (gamepad1.b) {
 //                        intakePos = 1;
 //                    }
-                if (gamepad1.y) {
-                    intakePos = 2;
-                }
+//                if (gamepad1.y) {
+//                    intakePos = 2;
+//                }
                 if (intakePos == 1) {
                     robot.intakePosition(0.3);
                 }
@@ -172,18 +195,6 @@ public class BasicTeleOp extends LinearOpMode {
                 }
 
 
-                if (!gamepad1.y) {
-                    armPositionToggle = true;
-                }
-                if (gamepad1.y && armPositionToggle) {
-                    armRunningToPos = true;
-                    if (robot.potentiometer.getVoltage() < 1.48) {
-                        armRunningUp = true;
-                    }
-                    if (robot.potentiometer.getVoltage() >= 1.48) {
-                        armRunningDown = true;
-                    }
-                }
                 if (Math.abs(gamepad1.right_stick_y) != 0) {
                     armRunningToPos = false;
                     armRunningDown = false;
@@ -230,7 +241,7 @@ public class BasicTeleOp extends LinearOpMode {
                 telemetry.addData("Back Right Drive Encoder", robot.backRightDrive.getCurrentPosition());
 
 
-                telemetry.addData("Potentiometer:", robot.potentiometer.getVoltage());
+//                telemetry.addData("Potentiometer:", robot.potentiometer.getVoltage());
 
                 relativeLayout.post(new Runnable() {
                     public void run() {

@@ -50,6 +50,8 @@ public class ResetTeleOp extends LinearOpMode {
         boolean armPositionToggle = true;
         boolean tiltToggle = true;
         int intakePos = 0;
+        boolean stopToggle = true;
+        int stopEngaged = 0;
         // string stuffs
         String actuatorDirection = "STOP";
         // String teamColor = "BLUE";
@@ -67,10 +69,29 @@ public class ResetTeleOp extends LinearOpMode {
         }
 
         waitForStart();
-
+        stopEngaged = 0;
+        robot.physicalStop.setPosition(1);
         robot.gatePosition("CLOSE");
 
         while (opModeIsActive()) {
+
+            if (!gamepad1.y){
+                stopToggle = true;
+            }
+            if (gamepad1.y && stopToggle){
+                stopToggle = false;
+                switch (stopEngaged) {
+                    case 0:
+                        robot.physicalStop.setPosition(1);
+                        stopEngaged = 1;
+                        break;
+                    case 1:
+                        robot.physicalStop.setPosition(0);
+                        stopEngaged = 0;
+                        break;
+                }
+            }
+
             telemetry.addData("Status:", "Running");
 
             speed = -gamepad1.left_stick_y;

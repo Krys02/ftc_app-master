@@ -32,13 +32,14 @@ package org.firstinspires.ftc.teamcode.OpenCVSamples;
 import com.opencv.checkmatecv.CameraViewDisplay;
 import com.opencv.checkmatecv.OpenCV;
 import com.opencv.checkmatecv.detectors.roverrukus.GoldDetector;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.opencv.core.Rect;
 
 
 @TeleOp(name="Gold Example", group="OpenCV")
-
+@Disabled
 public class GoldExample extends OpMode
 {
     // Detector object

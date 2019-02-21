@@ -27,6 +27,8 @@ public class CMHardware {
     public Servo gate = null;
     public Servo intakeTiltLeft = null;
     public Servo intakeTiltRight = null;
+    public Servo physicalStop = null;
+    public Servo marker = null;
 
     public AnalogInput potentiometer = null;
 
@@ -72,6 +74,8 @@ public class CMHardware {
         gate = hwMap.get(Servo.class, "gate");
         intakeTiltLeft = hwMap.get(Servo.class, "left");
         intakeTiltRight = hwMap.get(Servo.class, "right");
+        physicalStop = hwMap.get(Servo.class, "stop");
+        marker = hwMap.get(Servo.class, "marker");
 
         //init Sensors
         potentiometer = hwMap.get(AnalogInput.class, "potentiometer");
@@ -182,7 +186,6 @@ public class CMHardware {
         backRightDrive.setPower(-speed);
         rightDrive.setPower(-speed);
     }
-
     public void actuatorPower(double speed) {
         actuator1.setPower(speed);
         actuator2.setPower(speed);
